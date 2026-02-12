@@ -66,15 +66,22 @@ dev-dependencies = []
 
 [tool.uv.sources]
 torch = [
-    { index = "pytorch-cuda12" }
+    { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+    { index = "pytorch-cu126", marker = "sys_platform == 'linux'" },
 ]
 torchvision = [
-    { index = "pytorch-cuda12" }
+    { index = "pytorch-cpu", marker = "sys_platform != 'linux'" },
+    { index = "pytorch-cu126", marker = "sys_platform == 'linux'" },
 ]
 
 [[tool.uv.index]]
-name = "pytorch-cuda12"
-url = "https://download.pytorch.org/whl/cu121"
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
 explicit = true
 
 [tool.black]
