@@ -1,0 +1,92 @@
+[project]
+name = "phaze-ee"
+version = "0.1.3"
+description = "Early Exit mechanisms for ML models in High Energy Physics - PHAZE Framework"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "PHAZE-EE Contributors" }
+]
+keywords = ["machine-learning", "high-energy-physics", "early-exit", "inference-optimization"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "weaver-core>=0.4.17",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
+    "pyyaml>=6.0",
+    "tqdm>=4.65.0",
+    "pandas>=2.0.0",
+    "scikit-learn>=1.3.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "tensorboard>=2.13.0",
+    "h5py>=3.8.0",
+    "awkward>=2.0.0",
+    "uproot>=5.0.0",
+    "onnx>=1.14.0",
+    "art>=6.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "cupy-cuda12x>=12.0.0",
+]
+viz = [
+    "plotly>=5.14.0",
+    "ipywidgets>=8.0.0",
+]
+dev = [
+    "pytest>=7.3.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.3.0",
+    "ruff>=0.0.270",
+    "mypy>=1.3.0",
+]
+
+[project.scripts]
+phaze_ee = "phaze_ee.phaze_ee:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cuda12" }
+]
+torchvision = [
+    { index = "pytorch-cuda12" }
+]
+
+[[tool.uv.index]]
+name = "pytorch-cuda12"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
