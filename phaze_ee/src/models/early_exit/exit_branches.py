@@ -99,3 +99,57 @@ class ConvExitBranch(nn.Module):
         x = self.dropout(x)
         x = self.fc(x)
         return x
+
+
+class LinearExitBranch(nn.Module):
+    """Simple linear exit branch for spatial features.
+    
+    The simplest naive exit branch: applies global pooling (matching ParticleNet's 
+    pooling strategy) and a single linear layer. No conv layers or hidden dimensions.
+    This is the baseline for benchmarking early exit strategies.
+    """
+    
+    def __init__(
+        self,
+        input_channels: int,
+        num_classes: int,
+        use_counts: bool = True,
+    ):
+        """Initialize linear exit branch.
+        
+        Args:
+            input_channels: Number of input channels from EdgeConv block
+            num_classes: Number of output classes
+            use_counts: Whether to use particle counts for mean pooling (matching ParticleNet)
+        """
+        super().__init__()
+        self.use_counts = use_counts
+        self.fc = nn.Linear(input_channels, num_classes)
+    
+    def forward(self, x: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
+        """Forward pass through linear exit branch.
+        
+        Args:
+            x: Input features with shape (batch, channels, num_points)
+            mask: Optional mask with shape (batch, 1, num_points)
+        
+        Returns:
+            torch.Tensor: Class logits with shape (batch, num_classes)
+        """
+        # Apply mask if provided
+        if mask is not None:
+            x = x * mask
+        
+        # Global pooling matching ParticleNet's strategy
+        if self.use_counts and mask is not None:
+            # Mean pooling: sum over points / counts
+            counts = mask.sum(dim=-1, keepdim=False)  # (batch, 1)
+            x = x.sum(dim=-1)  # (batch, channels)
+            x = x / counts.clamp(min=1)  # Avoid division by zero
+        else:
+            # Simple mean pooling
+            x = x.mean(dim=-1)  # (batch, channels)
+        
+        # Linear classifier
+        x = self.fc(x)  # (batch, num_classes)
+        return x
