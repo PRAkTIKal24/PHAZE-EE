@@ -30,6 +30,7 @@ def main():
         evaluate: Evaluate early exit performance across different exit points.
         benchmark: Profile FLOPs and parameters at each exit point.
         plot: Generate visualization plots for parameter reduction vs performance.
+        compare: Generate comparison plots across multiple projects in a workspace.
         chain: Execute the full pipeline from project creation to visualization.
 
     Raises:
@@ -42,6 +43,7 @@ def main():
         workspace_name,
         project_name,
         verbose,
+        projects,
     ) = ggl.get_arguments()
 
     # Initialize DDP if configured and multiple GPUs are available
@@ -114,6 +116,19 @@ def main():
         ggl.run_benchmark(paths, config, verbose)
     elif mode == "plot":
         ggl.run_plots(paths, config, verbose)
+    elif mode == "compare":
+        # Validate projects argument
+        if not projects or len(projects) < 2:
+            raise ValueError(
+                "Compare mode requires at least 2 projects. "
+                "Use --projects project1 project2 ..."
+            )
+        ggl.run_comparison(
+            workspace_path=paths["workspace_path"],
+            project_names=projects,
+            output_path=None,  # Will default to workspace/comparisons/
+            verbose=verbose,
+        )
     elif mode == "chain":
         ggl.run_full_chain(
             workspace_name, project_name, paths, config, options, verbose
