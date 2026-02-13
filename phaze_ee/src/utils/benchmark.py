@@ -235,7 +235,7 @@ def parse_complexity_string(complexity_str: str) -> Optional[float]:
 
         multiplier = multipliers.get(unit, 1)
         return value * multiplier
-    except:  # noqa: E722
+    except Exception:
         return None
 
 
