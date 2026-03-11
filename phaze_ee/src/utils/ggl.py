@@ -271,7 +271,8 @@ def set_config(c):
     c.data_config = "data_configs/JetClass_full.yaml"  # Path to weaver data config YAML
 
     # Data file paths (auto-populated from data_config or manually specified)
-    # Example: c.train_files = glob('/path/to/JetClass/train/**/*.root')
+    # Example: c.train_files = glob('/path/to/JetClass/train/**/*.root', recursive=True)
+    # NOTE: glob() with ** pattern requires recursive=True parameter!
     c.train_files = []  # Training data files
     c.val_files = []    # Validation data files
     c.test_files = []   # Test data files

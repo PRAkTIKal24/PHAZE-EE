@@ -127,11 +127,13 @@ Edit the config file: `phaze_ee/workspaces/JetClass/my_first_experiment/config/m
 **Key Configuration Parameters:**
 
 ```python
+from glob import glob
+
 def set_config(c):
     # ===== Data Configuration =====
     c.data_config = 'data_configs/JetClass_full.yaml'
-    c.train_files = ['path/to/train/*.root']  # Update with your data paths
-    c.val_files = ['path/to/val/*.root']
+    c.train_files = glob('/path/to/train/**/*.root', recursive=True)  # Update with your data paths
+    c.val_files = glob('/path/to/val/**/*.root', recursive=True)
     
     # ===== Network Architecture =====
     c.network_config = 'network_configs/ParticleNet_JetClass.py'
@@ -494,9 +496,10 @@ All configuration is done via Python config files in `<workspace>/<project>/conf
 
 #### Data Configuration
 ```python
-c.data_config = 'data_configs/JetClass_full.yaml'  # Path to YAML data config
-c.train_files = ['path/to/train/*.root']            # Training files
-c.val_files = ['path/to/val/*.root']                # Validation files
+from glob import glob
+c.data_config = 'data_configs/JetClass_full.yaml'           # Path to YAML data config
+c.train_files = glob('/path/to/train/**/*.root', recursive=True)  # Training files
+c.val_files = glob('/path/to/val/**/*.root', recursive=True)      # Validation files
 ```
 
 #### Network Architecture
@@ -590,9 +593,11 @@ uv pip install weaver-core>=0.4.17
 
 **2. Data not found errors**
 ```python
-# Update paths in config file
-c.train_files = ['/absolute/path/to/train/*.root']
-c.val_files = ['/absolute/path/to/val/*.root']
+# Update paths in config file (use glob to expand wildcards)
+from glob import glob
+c.train_files = glob('/absolute/path/to/train/**/*.root', recursive=True)
+c.val_files = glob('/absolute/path/to/val/**/*.root', recursive=True)
+# Note: glob() with ** requires recursive=True!
 ```
 
 **3. CUDA out of memory**
