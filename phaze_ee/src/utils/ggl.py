@@ -342,10 +342,10 @@ def run_training(paths: dict, config, verbose: bool = False) -> None:
 
         # Training dataset
         train_dataset = SimpleIterDataset(
-            data_config,
-            config.train_files if config.train_files else [],
+            file_dict={'train': config.train_files if config.train_files else []},
+            data_config_file=config.data_config,
             for_training=True,
-            load_range=(0, 1),  # Load all data
+            load_range_and_fraction=(0, 1),  # Load all data
         )
 
         train_loader = DataLoader(
@@ -358,10 +358,10 @@ def run_training(paths: dict, config, verbose: bool = False) -> None:
 
         # Validation dataset
         val_dataset = SimpleIterDataset(
-            data_config,
-            config.val_files if config.val_files else [],
+            file_dict={'val': config.val_files if config.val_files else []},
+            data_config_file=config.data_config,
             for_training=False,
-            load_range=(0, 1),
+            load_range_and_fraction=(0, 1),
         )
 
         val_loader = DataLoader(
@@ -464,10 +464,10 @@ def run_evaluation(paths: dict, config, verbose: bool = False) -> None:
         from weaver.utils.dataset import SimpleIterDataset
 
         test_dataset = SimpleIterDataset(
-            data_config,
-            config.test_files if config.test_files else config.val_files,
+            file_dict={'test': config.test_files if config.test_files else config.val_files},
+            data_config_file=config.data_config,
             for_training=False,
-            load_range=(0, 1),
+            load_range_and_fraction=(0, 1),
         )
 
         test_loader = DataLoader(
