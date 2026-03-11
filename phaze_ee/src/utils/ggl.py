@@ -219,6 +219,9 @@ def create_default_config(workspace_name: str, project_name: str) -> str:
 # Workspace: {workspace_name}
 # PHAZE-EE Early Exit Training Configuration
 
+from glob import glob
+
+
 def set_config(c):
     """Set configuration parameters for PHAZE-EE early exit training.
 
