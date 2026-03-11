@@ -105,12 +105,16 @@ observers:
 
 weights:
    ### reweight_method: [none/ref/flat] - method for reweighting events
-   reweight_method: none
+   ### reweight_vars: variables used for reweighting (maps var name to bin edges)
+   ### reweight_classes: list of class labels for reweighting
    ### [option 1] use precomputed weights stored in the input files
    # use_precomputed_weights: true
    # weight_branches: [weight, class_weight]
-   ### [option 2] class reweighting: use 'class_weights' to perform class-balancing
-   # class_weights:
-   #   - [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # values for [QCD, Hbb, Hcc, Hgg, H4q, Hqql, Zqq, Wqq, Tbqq, Tbl]
-   ### [option 3] no weights
+   ### [option 2] no reweighting (default)
    use_precomputed_weights: false
+   reweight_method: none
+   reweight_vars:
+      jet_pt: [500, 600, 700, 800, 900, 1000]
+   reweight_classes: [label_QCD, label_Hbb, label_Hcc, label_Hgg, label_H4q, label_Hqql, label_Zqq, label_Wqq, label_Tbqq, label_Tbl]
+   ### [option 3] class reweighting: uncomment and modify to enable class balancing
+   # class_weights: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  # values for [QCD, Hbb, Hcc, Hgg, H4q, Hqql, Zqq, Wqq, Tbqq, Tbl]
