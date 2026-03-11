@@ -285,7 +285,7 @@ def set_config(c):
     c.log_interval = 10   # Log metrics every N batches
     c.val_interval = 1    # Validate every N epochs
     c.save_interval = 10  # Save checkpoint every N epochs
-    c.num_workers = 4     # DataLoader workers (increase for faster I/O)
+    c.num_workers = 0     # DataLoader workers (SimpleIterDataset requires 0 for compatibility)
 
     # ===== Benchmarking =====
     c.profile_flops = True        # Profile FLOPs at each exit point
@@ -346,7 +346,7 @@ def run_training(paths: dict, config, verbose: bool = False) -> None:
             file_dict={'train': config.train_files if config.train_files else []},
             data_config_file=config.data_config,
             for_training=True,
-            load_range_and_fraction=(0, 1),  # Load all data
+            load_range_and_fraction=((0, 1), 1),  # Load all data: ((start, end), fraction)
         )
 
         train_loader = DataLoader(
@@ -362,7 +362,7 @@ def run_training(paths: dict, config, verbose: bool = False) -> None:
             file_dict={'val': config.val_files if config.val_files else []},
             data_config_file=config.data_config,
             for_training=False,
-            load_range_and_fraction=(0, 1),
+            load_range_and_fraction=((0, 1), 1),  # Load all data: ((start, end), fraction)
         )
 
         val_loader = DataLoader(
@@ -468,7 +468,7 @@ def run_evaluation(paths: dict, config, verbose: bool = False) -> None:
             file_dict={'test': config.test_files if config.test_files else config.val_files},
             data_config_file=config.data_config,
             for_training=False,
-            load_range_and_fraction=(0, 1),
+            load_range_and_fraction=((0, 1), 1),  # Load all data: ((start, end), fraction)
         )
 
         test_loader = DataLoader(
