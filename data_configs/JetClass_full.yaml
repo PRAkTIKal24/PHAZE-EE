@@ -3,10 +3,10 @@ treename: tree
 selection:
    ### use `&` for logical AND, `|` for logical OR
    ### can use functions from `math`, `np` (numpy), and `awkward` in the expression
-   (jet_pt > 500) & (jet_pt < 1000) & (abs(jet_eta) < 2)
+   (jet_pt > 500) & (jet_pt < 1000) & (np.abs(jet_eta) < 2)
 
 test_time_selection:
-   (jet_pt > 500) & (jet_pt < 1000) & (abs(jet_eta) < 2)
+   (jet_pt > 500) & (jet_pt < 1000) & (np.abs(jet_eta) < 2)
 
 new_variables:
    ### [format] name: formula
