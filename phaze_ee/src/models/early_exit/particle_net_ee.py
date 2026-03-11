@@ -28,6 +28,7 @@ class ParticleNetEE(nn.Module):
         self,
         base_model: ParticleNet,
         num_classes: int,
+        conv_params: List[Tuple[int, Tuple[int, ...]]],
         num_exit_points: Optional[int] = None,
         use_counts: bool = True,
     ):
@@ -36,6 +37,7 @@ class ParticleNetEE(nn.Module):
         Args:
             base_model: The base ParticleNet model (from weaver_models)
             num_classes: Number of output classes
+            conv_params: EdgeConv parameters [(k, (channels...)), ...] from ParticleNet config
             num_exit_points: Number of exit points to add (default: number of EdgeConv blocks)
             use_counts: Whether to use particle counts for global pooling
         """
@@ -45,6 +47,7 @@ class ParticleNetEE(nn.Module):
         self.base_model = base_model
         self.num_classes = num_classes
         self.use_counts = use_counts
+        self.conv_params = conv_params
         
         # Determine number of EdgeConv blocks in the base model
         num_edge_convs = len(base_model.edge_convs)
@@ -59,10 +62,11 @@ class ParticleNetEE(nn.Module):
         # Each branch takes the output channels of the corresponding EdgeConv block
         self.exit_branches = nn.ModuleList()
         for i in range(num_exit_points):
-            edge_conv = base_model.edge_convs[i]
-            # Get output channels from the EdgeConv block
-            # out_feats is a tuple/list; last element is the output channel count
-            out_channels = edge_conv.out_feats[-1]
+            # Get output channels from conv_params
+            # conv_params format: [(k, (channels...)), ...]
+            # Last channel in the tuple is the output channel count
+            _, channels = conv_params[i]
+            out_channels = channels[-1]
             
             branch = LinearExitBranch(
                 input_channels=out_channels,
@@ -274,6 +278,7 @@ def create_particle_net_ee(
     model = ParticleNetEE(
         base_model=base_model,
         num_classes=num_classes,
+        conv_params=conv_params,
         num_exit_points=num_exit_points,
         use_counts=use_counts,
     )
