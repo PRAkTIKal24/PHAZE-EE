@@ -112,7 +112,7 @@ def train_early_exit_model(
         scheduler = None
 
     # Setup AMP
-    scaler = torch.cuda.amp.GradScaler() if config.use_amp else None
+    scaler = torch.amp.GradScaler('cuda') if config.use_amp else None
 
     # Setup loss criterion
     criterion = nn.CrossEntropyLoss()
@@ -286,7 +286,7 @@ def train_epoch(
     betas: list,
     config,
     device: torch.device,
-    scaler: Optional[torch.cuda.amp.GradScaler] = None,
+    scaler: Optional[torch.amp.GradScaler] = None,
     epoch: int = 0,
     verbose: bool = False,
 ) -> Dict[str, float]:
