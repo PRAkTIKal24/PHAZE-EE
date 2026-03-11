@@ -77,7 +77,7 @@ class Config:
     log_interval: int = 10
     val_interval: int = 1
     save_interval: int = 10
-    num_workers: int = 4
+    num_workers: int = 0  # SimpleIterDataset doesn't work well with multi-worker DataLoader
     
     # Benchmarking
     profile_flops: bool = True
