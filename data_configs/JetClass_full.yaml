@@ -104,6 +104,8 @@ observers:
    - jet_sdmass
 
 weights:
+   ### reweight_method: [none/ref/flat] - method for reweighting events
+   reweight_method: none
    ### [option 1] use precomputed weights stored in the input files
    # use_precomputed_weights: true
    # weight_branches: [weight, class_weight]
