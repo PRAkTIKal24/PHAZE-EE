@@ -119,14 +119,9 @@ def benchmark_exit_points(
         try:
             from weaver.utils.flops_counter import get_model_complexity_info
 
-            # Wrapper to match expected input format
-            def input_constructor(input_res):
-                return (sample_points, sample_features, sample_mask)
-
             macs_str, params_str = get_model_complexity_info(
                 partial_model,
-                input_res=(2, num_points),  # Dummy resolution
-                input_constructor=input_constructor,
+                inputs=(sample_points, sample_features, sample_mask),
                 as_strings=True,
                 print_per_layer_stat=False,
             )
@@ -164,14 +159,10 @@ def benchmark_exit_points(
     try:
         from weaver.utils.flops_counter import get_model_complexity_info
 
-        def input_constructor_full(input_res):
-            return (sample_points, sample_features, sample_mask)
-
         # Use base model for full FLOPs counting
         macs_str_full, params_str_full = get_model_complexity_info(
             model.base_model,
-            input_res=(2, num_points),
-            input_constructor=input_constructor_full,
+            inputs=(sample_points, sample_features, sample_mask),
             as_strings=True,
             print_per_layer_stat=False,
         )
@@ -254,10 +245,13 @@ def profile_model_complexity(
     """
     try:
         from weaver.utils.flops_counter import get_model_complexity_info
+        import torch
+
+        dummy_inputs = tuple(torch.randn(1, *shape) for shape in input_shape) if isinstance(input_shape[0], tuple) else (torch.randn(1, *input_shape),)
 
         macs_str, params_str = get_model_complexity_info(
             model,
-            input_res=input_shape,
+            inputs=dummy_inputs,
             as_strings=True,
             print_per_layer_stat=False,
         )
