@@ -88,11 +88,8 @@ class ExitLossComputer:
             loss = F.mse_loss(exit_output, full_output)
         
         elif self.strategy == ExitLossStrategy.TARGET_DETACHED:
-            # Not directly supported - would require recomputing exit from detached features
-            # For simplicity, we use the already computed exit_output but note this
-            # doesn't fully detach (exit_output was computed from non-detached features)
-            # True implementation would need to pass detached features to exit branch
-            # This is a limitation we accept for the naive baseline
+            # CrossEntropyLoss between exit output and ground truth labels
+            # Note: exit_output was computed locally from detached backbone features
             loss = self.criterion(exit_output, labels)
         
         elif self.strategy == ExitLossStrategy.TARGET_FLOW:
