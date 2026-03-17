@@ -81,6 +81,7 @@ class ParticleNetEE(nn.Module):
         features: torch.Tensor,
         mask: Optional[torch.Tensor] = None,
         return_exit_outputs: bool = True,
+        detach_exits: bool = False,
     ) -> Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]]:
         """Forward pass with early exit branches.
         
@@ -93,6 +94,7 @@ class ParticleNetEE(nn.Module):
             features: Point features (batch, num_features, num_points)
             mask: Optional binary mask (batch, 1, num_points)
             return_exit_outputs: Whether to compute and return exit outputs
+            detach_exits: Whether to detach features before computing exit outputs
         
         Returns:
             Tuple containing:
@@ -127,7 +129,8 @@ class ParticleNetEE(nn.Module):
                 exit_features.append(fts)
                 
                 # Apply exit branch
-                exit_output = self.exit_branches[idx](fts, mask)
+                exit_input = fts.detach() if detach_exits else fts
+                exit_output = self.exit_branches[idx](exit_input, mask)
                 exit_outputs.append(exit_output)
             
             # Store for fusion if base model uses fusion
