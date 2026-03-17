@@ -316,13 +316,16 @@ def train_epoch(
         # Get labels
         labels = y.get("_label_", y.get("label")).long().to(device)
 
-        # Forward pass with AMP
+        # Backward pass
         optimizer.zero_grad()
+        
+        # Determine whether to detach exits based on strategy
+        detach_exits = "detached" in config.exit_loss_strategy
 
         with torch.cuda.amp.autocast(enabled=(scaler is not None)):
             # Forward through early exit model
             full_output, exit_outputs, exit_features = model(
-                points, features, mask, return_exit_outputs=True
+                points, features, mask, return_exit_outputs=True, detach_exits=detach_exits
             )
 
             # Compute multi-exit loss
@@ -406,9 +409,12 @@ def validate(
 
             labels = y.get("_label_", y.get("label")).long().to(device)
 
+            # Determine whether to detach exits based on strategy
+            detach_exits = "detached" in config.exit_loss_strategy
+
             # Forward pass
             full_output, exit_outputs, exit_features = model(
-                points, features, mask, return_exit_outputs=True
+                points, features, mask, return_exit_outputs=True, detach_exits=detach_exits
             )
 
             # Compute loss
