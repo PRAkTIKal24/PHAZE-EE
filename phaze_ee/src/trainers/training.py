@@ -124,6 +124,8 @@ def train_early_exit_model(
         zero_epochs=config.beta_zero_epochs,
         ramp_type=config.beta_ramp_type,
         per_exit=True,
+        ramp_end=config.beta_ramp_end,
+        switch_end=config.beta_switch_end,
     )
 
     # Setup TensorBoard
