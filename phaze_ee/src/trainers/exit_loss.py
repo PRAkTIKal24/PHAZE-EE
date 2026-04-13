@@ -148,7 +148,7 @@ class BetaScheduler:
     """Scheduler for beta values (exit loss weights) during training.
     
     Supports dynamic scheduling where beta starts at 0 for initial epochs,
-    then ramps up according to a schedule (linear or cosine).
+    then ramps up according to a schedule (linear or cosine), or switches on and off.
     """
     
     def __init__(
@@ -158,6 +158,8 @@ class BetaScheduler:
         zero_epochs: int = 0,
         ramp_type: str = "linear",
         per_exit: bool = True,
+        ramp_end: Optional[int] = None,
+        switch_end: Optional[int] = None,
     ):
         """Initialize beta scheduler.
         
@@ -165,21 +167,25 @@ class BetaScheduler:
             beta_max: Maximum beta values (one per exit if per_exit=True, else single value)
             total_epochs: Total number of training epochs
             zero_epochs: Number of initial epochs with beta=0
-            ramp_type: Ramp schedule type ("linear" or "cosine")
+            ramp_type: Ramp schedule type ("linear", "cosine", or "switch")
             per_exit: Whether each exit has its own beta_max
+            ramp_end: Epoch to end ramp and hold at max (default: zero_epochs + 2)
+            switch_end: Epoch to turn off switch strategy (default: None, stay on till end)
         """
         self.beta_max = beta_max if isinstance(beta_max, list) else [beta_max]
         self.total_epochs = total_epochs
         self.zero_epochs = zero_epochs
         self.ramp_type = ramp_type
         self.per_exit = per_exit
+        self.ramp_end = ramp_end if ramp_end is not None else zero_epochs + 2
+        self.switch_end = switch_end
         
         # Validate
         if zero_epochs >= total_epochs:
             raise ValueError(f"zero_epochs ({zero_epochs}) must be < total_epochs ({total_epochs})")
         
-        if ramp_type not in ["linear", "cosine"]:
-            raise ValueError(f"ramp_type must be 'linear' or 'cosine', got: {ramp_type}")
+        if ramp_type not in ["linear", "cosine", "switch"]:
+            raise ValueError(f"ramp_type must be 'linear', 'cosine', or 'switch', got: {ramp_type}")
     
     def get_betas(self, epoch: int, num_exits: int) -> List[float]:
         """Get beta values for the current epoch.
@@ -194,20 +200,30 @@ class BetaScheduler:
         # During zero epochs, beta is 0
         if epoch < self.zero_epochs:
             return [0.0] * num_exits
-        
-        # After zero epochs, compute ramp progress
-        ramp_epochs = self.total_epochs - self.zero_epochs
-        progress = (epoch - self.zero_epochs) / ramp_epochs
-        progress = min(progress, 1.0)  # Clamp to [0, 1]
-        
-        # Compute scaling factor based on ramp type
-        if self.ramp_type == "linear":
-            scale = progress
-        elif self.ramp_type == "cosine":
-            # Cosine ramp: 0.5 * (1 - cos(pi * t))
-            scale = 0.5 * (1.0 - math.cos(math.pi * progress))
+            
+        # Switch strategy logic
+        if self.ramp_type == "switch":
+            if self.switch_end is not None and epoch >= self.switch_end:
+                return [0.0] * num_exits
+            # Otherwise, we are past zero_epochs and before switch_end
+            scale = 1.0
         else:
-            scale = progress  # Fallback to linear
+            # After zero epochs, compute ramp progress up to ramp_end
+            ramp_epochs = self.ramp_end - self.zero_epochs
+            if ramp_epochs <= 0:
+                progress = 1.0
+            else:
+                progress = (epoch - self.zero_epochs) / ramp_epochs
+            progress = min(progress, 1.0)  # Clamp to [0, 1]
+            
+            # Compute scaling factor based on ramp type
+            if self.ramp_type == "linear":
+                scale = progress
+            elif self.ramp_type == "cosine":
+                # Cosine ramp: 0.5 * (1 - cos(pi * t))
+                scale = 0.5 * (1.0 - math.cos(math.pi * progress))
+            else:
+                scale = progress  # Fallback to linear
         
         # Apply scaling to beta_max for each exit
         betas = []
