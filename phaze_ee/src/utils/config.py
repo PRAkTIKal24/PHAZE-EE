@@ -53,7 +53,9 @@ class Config:
     # Beta scheduling for exit losses
     beta_max: List[float] = field(default_factory=lambda: [0.1, 0.1, 0.1])  # Max beta per exit
     beta_zero_epochs: int = 10  # Number of initial epochs with beta=0
-    beta_ramp_type: str = "linear"  # linear | cosine
+    beta_ramp_type: str = "linear"  # linear | cosine | switch
+    beta_ramp_end: Optional[int] = None  # Epoch to end linear/cosine ramp. Defaults to beta_zero_epochs + 2.
+    beta_switch_end: Optional[int] = None  # Epoch to switch back off for 'switch' ramp type.
     
     # Legacy exit config (for backward compatibility)
     exit_loss_weights: List[float] = field(default_factory=lambda: [0.3, 0.5, 1.0])
