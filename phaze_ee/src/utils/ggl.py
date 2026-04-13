@@ -245,9 +245,9 @@ def set_config(c):
     c.use_counts = True          # Use particle counts for global pooling
 
     # ===== Training Configuration =====
-    c.epochs = 50                # Total training epochs (weaver default for JetClass)
+    c.epochs = 12                # Total training epochs (weaver default for JetClass)
     c.lr = 1e-2                  # Learning rate (1e-2 for ParticleNet, 1e-3 for ParT)
-    c.batch_size = 512           # Batch size
+    c.batch_size = 4096          # Batch size
     c.optimizer = "ranger"       # Options: adam, adamw, ranger (weaver default)
     c.scheduler = "flat+decay"   # Options: flat+decay, cosine, step (weaver default)
     c.weight_decay = 1e-4        # Weight decay for optimizer
@@ -264,8 +264,10 @@ def set_config(c):
 
     # ===== Beta Scheduling (Exit Loss Weights) =====
     c.beta_max = [0.1, 0.1, 0.1]     # Max beta value for each exit point
-    c.beta_zero_epochs = 10          # Number of initial epochs with beta=0
-    c.beta_ramp_type = "linear"      # Ramp type: linear or cosine
+    c.beta_zero_epochs = 6           # Number of initial epochs with beta=0
+    c.beta_ramp_type = "linear"      # Ramp type: linear, cosine or switch
+    c.beta_ramp_end = None           # Ramp end: For linear/cosine. Default: beta_zero_epochs + 2.
+    c.beta_switch_end = None         # Switch end: End of training if None
 
     # ===== Data Configuration =====
     c.data_config = "data_configs/JetClass_full.yaml"  # Path to weaver data config YAML
@@ -282,9 +284,9 @@ def set_config(c):
     c.use_amp = True    # Automatic Mixed Precision (fp16)
 
     # ===== Logging and Checkpointing =====
-    c.log_interval = 10   # Log metrics every N batches
-    c.val_interval = 1    # Validate every N epochs
-    c.save_interval = 10  # Save checkpoint every N epochs
+    c.log_interval = 6   # Log metrics every N batches
+    c.val_interval = 2    # Validate every N epochs
+    c.save_interval = 4  # Save checkpoint every N epochs
     c.num_workers = 0     # DataLoader workers (SimpleIterDataset requires 0 for compatibility)
 
     # ===== Benchmarking =====
