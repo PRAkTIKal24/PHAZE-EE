@@ -92,7 +92,14 @@ def plot_flops_vs_accuracy(
         ax.set_ylabel('Accuracy', fontsize=14, fontweight='bold')
         ax.set_title(f'FLOPs vs Accuracy - {config.model_name} Early Exit', 
                     fontsize=16, fontweight='bold', pad=20)
-        ax.set_xscale('log')
+        
+        # Set exact x-axis ticks to match scatter points
+        all_flops = flops_list + [flops_full]
+        ax.set_xticks(all_flops)
+        # Format ticks as MMacs (millions)
+        ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+        ax.tick_params(axis='x', rotation=45)
+        
         ax.grid(True, alpha=0.3)
         ax.legend(loc='lower right', framealpha=0.9)
         
@@ -177,7 +184,14 @@ def plot_params_vs_accuracy(
         ax.set_ylabel('Accuracy', fontsize=14, fontweight='bold')
         ax.set_title(f'Parameters vs Accuracy - {config.model_name} Early Exit', 
                     fontsize=16, fontweight='bold', pad=20)
-        ax.set_xscale('log')
+        
+        # Set exact x-axis ticks to match scatter points
+        all_params = params_list + [params_full]
+        ax.set_xticks(all_params)
+        # Format ticks as M (millions)
+        ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+        ax.tick_params(axis='x', rotation=45)
+        
         ax.grid(True, alpha=0.3)
         ax.legend(loc='lower right', framealpha=0.9)
         
@@ -395,7 +409,16 @@ def plot_comparison_flops_vs_accuracy(
     ax.set_ylabel('Accuracy', fontsize=14, fontweight='bold')
     ax.set_title('FLOPs vs Accuracy - Multi-Project Comparison', 
                 fontsize=16, fontweight='bold', pad=20)
-    ax.set_xscale('log')
+    
+    # Collect all unique x values for ticks
+    all_x = []
+    for line in ax.lines:
+        all_x.extend(line.get_xdata())
+    all_x = sorted(list(set(all_x)))
+    ax.set_xticks(all_x)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+    ax.tick_params(axis='x', rotation=45)
+    
     ax.grid(True, alpha=0.3)
     ax.legend(loc='best', framealpha=0.9, fontsize=10)
     
@@ -494,7 +517,16 @@ def plot_comparison_params_vs_accuracy(
     ax.set_ylabel('Accuracy', fontsize=14, fontweight='bold')
     ax.set_title('Parameters vs Accuracy - Multi-Project Comparison', 
                 fontsize=16, fontweight='bold', pad=20)
-    ax.set_xscale('log')
+    
+    # Collect all unique x values for ticks
+    all_x = []
+    for line in ax.lines:
+        all_x.extend(line.get_xdata())
+    all_x = sorted(list(set(all_x)))
+    ax.set_xticks(all_x)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+    ax.tick_params(axis='x', rotation=45)
+    
     ax.grid(True, alpha=0.3)
     ax.legend(loc='best', framealpha=0.9, fontsize=10)
     
