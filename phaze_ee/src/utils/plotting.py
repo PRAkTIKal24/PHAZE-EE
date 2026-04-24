@@ -150,16 +150,16 @@ def plot_flops_vs_auc(
     
     for i in range(config.num_exit_points):
         key = f'exit_{i}'
-        if key in results and results[key]['flops'] is not None and results[key]['auc'] is not None:
+        if key in results and results[key]['flops'] is not None and results[key]['roc_auc'] is not None:
             exit_indices.append(i)
             flops_list.append(results[key]['flops'])
-            auc_list.append(results[key]['auc'])
+            auc_list.append(results[key]['roc_auc'])
             labels.append(f'Exit {i}')
     
     # Add full model
     if 'full_model' in results and results['full_model']['flops'] is not None:
         flops_full = results['full_model']['flops']
-        auc_full = results['full_model']['auc']
+        auc_full = results['full_model']['roc_auc']
         
         # Create plot
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -332,16 +332,16 @@ def plot_params_vs_auc(
     
     for i in range(config.num_exit_points):
         key = f'exit_{i}'
-        if key in results and results[key]['params'] is not None and results[key]['auc'] is not None:
+        if key in results and results[key]['params'] is not None and results[key]['roc_auc'] is not None:
             exit_indices.append(i)
             params_list.append(results[key]['params'])
-            auc_list.append(results[key]['auc'])
+            auc_list.append(results[key]['roc_auc'])
             labels.append(f'Exit {i}')
     
     # Add full model
     if 'full_model' in results:
         params_full = results['full_model']['params']
-        auc_full = results['full_model']['auc']
+        auc_full = results['full_model']['roc_auc']
         
         # Create plot
         fig, ax = plt.subplots(figsize=(10, 6))
@@ -666,15 +666,15 @@ def plot_comparison_flops_vs_auc(
         
         for i in range(num_exits):
             key = f'exit_{i}'
-            if key in results and results[key].get('flops') is not None and results[key].get('auc') is not None:
+            if key in results and results[key].get('flops') is not None and results[key].get('roc_auc') is not None:
                 flops_list.append(results[key]['flops'])
-                auc_list.append(results[key]['auc'])
+                auc_list.append(results[key]['roc_auc'])
                 exit_labels.append(f'E{i}')
         
         # Add full model
         if 'full_model' in results and results['full_model'].get('flops') is not None:
             flops_full = results['full_model']['flops']
-            auc_full = results['full_model']['auc']
+            auc_full = results['full_model']['roc_auc']
             
             # Plot exit points as connected line
             ax.plot(flops_list, auc_list, 'o-', 
@@ -880,15 +880,15 @@ def plot_comparison_params_vs_auc(
         
         for i in range(num_exits):
             key = f'exit_{i}'
-            if key in results and results[key].get('params') is not None and results[key].get('auc') is not None:
+            if key in results and results[key].get('params') is not None and results[key].get('roc_auc') is not None:
                 params_list.append(results[key]['params'])
-                auc_list.append(results[key]['auc'])
+                auc_list.append(results[key]['roc_auc'])
                 exit_labels.append(f'E{i}')
         
         # Add full model
         if 'full_model' in results:
             params_full = results['full_model']['params']
-            auc_full = results['full_model']['auc']
+            auc_full = results['full_model']['roc_auc']
             
             # Plot exit points as connected line
             ax.plot(params_list, auc_list, 'o-', 
