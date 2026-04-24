@@ -57,6 +57,9 @@ dev = [
 [project.scripts]
 phaze_ee = "phaze_ee.phaze_ee:main"
 
+[tool.hatch.build.targets.wheel]
+packages = ["phaze_ee"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
