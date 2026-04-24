@@ -119,6 +119,97 @@ def plot_flops_vs_accuracy(
         plt.close(fig)
 
 
+def plot_flops_vs_auc(
+    paths: dict,
+    config,
+    verbose: bool = False,
+):
+    """Plot FLOPs vs ROC-AUC for each exit point and full model.
+    
+    Args:
+        paths: Dictionary with output_path
+        config: Config dataclass with plotting parameters
+        verbose: If True, print detailed progress
+    """
+    # Load benchmark results
+    benchmark_path = Path(paths['output_path']) / 'results' / 'benchmark_results.json'
+    if not benchmark_path.exists():
+        if verbose:
+            print(f"Error: Benchmark results not found at {benchmark_path}")
+            print("Please run benchmark first using --mode benchmark")
+        return
+    
+    with open(benchmark_path, 'r') as f:
+        results = json.load(f)
+    
+    # Extract data
+    exit_indices = []
+    flops_list = []
+    auc_list = []
+    labels = []
+    
+    for i in range(config.num_exit_points):
+        key = f'exit_{i}'
+        if key in results and results[key]['flops'] is not None and results[key]['auc'] is not None:
+            exit_indices.append(i)
+            flops_list.append(results[key]['flops'])
+            auc_list.append(results[key]['auc'])
+            labels.append(f'Exit {i}')
+    
+    # Add full model
+    if 'full_model' in results and results['full_model']['flops'] is not None:
+        flops_full = results['full_model']['flops']
+        auc_full = results['full_model']['auc']
+        
+        # Create plot
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Plot exit points
+        ax.plot(flops_list, auc_list, 'o-', markersize=10, linewidth=2, 
+                label='Early Exits', color='steelblue', alpha=0.7)
+        
+        # Plot full model
+        ax.plot([flops_full], [auc_full], '*', markersize=20, 
+                label='Full Model', color='crimson', markeredgecolor='darkred', markeredgewidth=1.5)
+        
+        # Annotate points
+        for i, (flops, auc, lbl) in enumerate(zip(flops_list, auc_list, labels)):
+            ax.annotate(lbl, (flops, auc), xytext=(5, 5), textcoords='offset points', 
+                       fontsize=9, alpha=0.8)
+        
+        ax.annotate('Full Model', (flops_full, auc_full), xytext=(5, -15), 
+                   textcoords='offset points', fontsize=10, fontweight='bold')
+        
+        # Formatting
+        ax.set_xlabel('FLOPs (MACs)', fontsize=14, fontweight='bold')
+        ax.set_ylabel('ROC-AUC', fontsize=14, fontweight='bold')
+        ax.set_title(f'FLOPs vs ROC-AUC - {config.model_name} Early Exit', 
+                    fontsize=16, fontweight='bold', pad=20)
+        
+        # Set exact x-axis ticks to match scatter points
+        all_flops = flops_list + [flops_full]
+        ax.set_xticks(all_flops)
+        # Format ticks as MMacs (millions)
+        ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+        ax.tick_params(axis='x', rotation=45)
+        
+        ax.grid(True, alpha=0.3)
+        ax.legend(loc='lower right', framealpha=0.9)
+        
+        
+        # Save plot
+        plot_dir = Path(paths['output_path']) / 'plots' / 'performance'
+        plot_dir.mkdir(parents=True, exist_ok=True)
+        
+        for fmt in config.plot_formats:
+            save_path = plot_dir / f'flops_vs_auc.{fmt}'
+            fig.savefig(save_path, dpi=config.plot_dpi, bbox_inches='tight')
+            if verbose:
+                print(f"Saved: {save_path}")
+        
+        plt.close(fig)
+
+
 def plot_params_vs_accuracy(
     paths: dict,
     config,
@@ -204,6 +295,96 @@ def plot_params_vs_accuracy(
         
         for fmt in config.plot_formats:
             save_path = plot_dir / f'params_vs_accuracy.{fmt}'
+            fig.savefig(save_path, dpi=config.plot_dpi, bbox_inches='tight')
+            if verbose:
+                print(f"Saved: {save_path}")
+        
+        plt.close(fig)
+
+
+def plot_params_vs_auc(
+    paths: dict,
+    config,
+    verbose: bool = False,
+):
+    """Plot Parameters vs ROC-AUC for each exit point and full model.
+    
+    Args:
+        paths: Dictionary with output_path
+        config: Config dataclass with plotting parameters
+        verbose: If True, print detailed progress
+    """
+    # Load benchmark results
+    benchmark_path = Path(paths['output_path']) / 'results' / 'benchmark_results.json'
+    if not benchmark_path.exists():
+        if verbose:
+            print(f"Error: Benchmark results not found at {benchmark_path}")
+        return
+    
+    with open(benchmark_path, 'r') as f:
+        results = json.load(f)
+    
+    # Extract data
+    exit_indices = []
+    params_list = []
+    auc_list = []
+    labels = []
+    
+    for i in range(config.num_exit_points):
+        key = f'exit_{i}'
+        if key in results and results[key]['params'] is not None and results[key]['auc'] is not None:
+            exit_indices.append(i)
+            params_list.append(results[key]['params'])
+            auc_list.append(results[key]['auc'])
+            labels.append(f'Exit {i}')
+    
+    # Add full model
+    if 'full_model' in results:
+        params_full = results['full_model']['params']
+        auc_full = results['full_model']['auc']
+        
+        # Create plot
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Plot exit points
+        ax.plot(params_list, auc_list, 'o-', markersize=10, linewidth=2, 
+                label='Early Exits', color='steelblue', alpha=0.7)
+        
+        # Plot full model
+        ax.plot([params_full], [auc_full], '*', markersize=20, 
+                label='Full Model', color='crimson', markeredgecolor='darkred', markeredgewidth=1.5)
+        
+        # Annotate points
+        for i, (params, auc, lbl) in enumerate(zip(params_list, auc_list, labels)):
+            ax.annotate(lbl, (params, auc), xytext=(5, 5), textcoords='offset points', 
+                       fontsize=9, alpha=0.8)
+        
+        ax.annotate('Full Model', (params_full, auc_full), xytext=(5, -15), 
+                   textcoords='offset points', fontsize=10, fontweight='bold')
+        
+        # Formatting
+        ax.set_xlabel('Parameters', fontsize=14, fontweight='bold')
+        ax.set_ylabel('ROC-AUC', fontsize=14, fontweight='bold')
+        ax.set_title(f'Parameters vs ROC-AUC - {config.model_name} Early Exit', 
+                    fontsize=16, fontweight='bold', pad=20)
+        
+        # Set exact x-axis ticks to match scatter points
+        all_params = params_list + [params_full]
+        ax.set_xticks(all_params)
+        # Format ticks as M (millions)
+        ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+        ax.tick_params(axis='x', rotation=45)
+        
+        ax.grid(True, alpha=0.3)
+        ax.legend(loc='lower right', framealpha=0.9)
+        
+        
+        # Save plot
+        plot_dir = Path(paths['output_path']) / 'plots' / 'performance'
+        plot_dir.mkdir(parents=True, exist_ok=True)
+        
+        for fmt in config.plot_formats:
+            save_path = plot_dir / f'params_vs_auc.{fmt}'
             fig.savefig(save_path, dpi=config.plot_dpi, bbox_inches='tight')
             if verbose:
                 print(f"Saved: {save_path}")
@@ -436,6 +617,112 @@ def plot_comparison_flops_vs_accuracy(
     plt.close(fig)
 
 
+def plot_comparison_flops_vs_auc(
+    workspace_path: str,
+    project_names: list,
+    save_path: str,
+    plot_formats: list = ['png', 'pdf'],
+    plot_dpi: int = 300,
+    verbose: bool = False,
+):
+    """Compare FLOPs vs ROC-AUC across multiple projects.
+    
+    Overlays results from multiple projects (e.g., different exit loss strategies)
+    onto a single plot for easy comparison.
+    
+    Args:
+        workspace_path: Path to workspace directory
+        project_names: List of project names to compare
+        save_path: Path to save the comparison plot
+        plot_formats: List of output formats ['png', 'pdf']
+        plot_dpi: DPI for saved plots
+        verbose: If True, print progress information
+    """
+    # Define color palette for different projects
+    colors = plt.cm.tab10(np.linspace(0, 1, len(project_names)))
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    for idx, project_name in enumerate(project_names):
+        # Load benchmark and evaluation results
+        results_dir = Path(workspace_path) / project_name / 'output' / 'results'
+        benchmark_path = results_dir / 'benchmark_results.json'
+        
+        if not benchmark_path.exists():
+            if verbose:
+                print(f"Warning: Benchmark results not found for project '{project_name}', skipping...")
+            continue
+        
+        with open(benchmark_path, 'r') as f:
+            results = json.load(f)
+        
+        # Extract exit point data
+        flops_list = []
+        auc_list = []
+        exit_labels = []
+        
+        # Get number of exits from the results
+        num_exits = sum(1 for key in results.keys() if key.startswith('exit_'))
+        
+        for i in range(num_exits):
+            key = f'exit_{i}'
+            if key in results and results[key].get('flops') is not None and results[key].get('auc') is not None:
+                flops_list.append(results[key]['flops'])
+                auc_list.append(results[key]['auc'])
+                exit_labels.append(f'E{i}')
+        
+        # Add full model
+        if 'full_model' in results and results['full_model'].get('flops') is not None:
+            flops_full = results['full_model']['flops']
+            auc_full = results['full_model']['auc']
+            
+            # Plot exit points as connected line
+            ax.plot(flops_list, auc_list, 'o-', 
+                   color=colors[idx], markersize=8, linewidth=2, 
+                   alpha=0.7, label=f'{project_name} (exits)')
+            
+            # Plot full model as star
+            ax.plot([flops_full], [auc_full], '*', 
+                   color=colors[idx], markersize=16, 
+                   markeredgecolor='black', markeredgewidth=0.5,
+                   label=f'{project_name} (full)')
+            
+            # Optionally annotate exit points for the first project only
+            if idx == 0:
+                for i, (flops, auc, lbl) in enumerate(zip(flops_list, auc_list, exit_labels)):
+                    ax.annotate(lbl, (flops, auc), xytext=(5, 5), 
+                               textcoords='offset points', fontsize=8, alpha=0.6)
+    
+    # Formatting
+    ax.set_xlabel('FLOPs (MACs)', fontsize=14, fontweight='bold')
+    ax.set_ylabel('ROC-AUC', fontsize=14, fontweight='bold')
+    ax.set_title('FLOPs vs ROC-AUC - Multi-Project Comparison', 
+                fontsize=16, fontweight='bold', pad=20)
+    
+    # Collect all unique x values for ticks
+    all_x = []
+    for line in ax.lines:
+        all_x.extend(line.get_xdata())
+    all_x = sorted(list(set(all_x)))
+    ax.set_xticks(all_x)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+    ax.tick_params(axis='x', rotation=45)
+    
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='best', framealpha=0.9, fontsize=10)
+    
+    
+    # Save plot
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    for fmt in plot_formats:
+        output_path = save_path.replace('.png', f'.{fmt}')
+        fig.savefig(output_path, dpi=plot_dpi, bbox_inches='tight')
+        if verbose:
+            print(f"Saved comparison plot: {output_path}")
+    
+    plt.close(fig)
+
+
 def plot_comparison_params_vs_accuracy(
     workspace_path: str,
     project_names: list,
@@ -532,6 +819,112 @@ def plot_comparison_params_vs_accuracy(
     
     # Format y-axis as percentage
     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f'{y:.1%}'))
+    
+    # Save plot
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+    for fmt in plot_formats:
+        output_path = save_path.replace('.png', f'.{fmt}')
+        fig.savefig(output_path, dpi=plot_dpi, bbox_inches='tight')
+        if verbose:
+            print(f"Saved comparison plot: {output_path}")
+    
+    plt.close(fig)
+
+
+def plot_comparison_params_vs_auc(
+    workspace_path: str,
+    project_names: list,
+    save_path: str,
+    plot_formats: list = ['png', 'pdf'],
+    plot_dpi: int = 300,
+    verbose: bool = False,
+):
+    """Compare Parameters vs ROC-AUC across multiple projects.
+    
+    Overlays results from multiple projects (e.g., different exit loss strategies)
+    onto a single plot for easy comparison.
+    
+    Args:
+        workspace_path: Path to workspace directory
+        project_names: List of project names to compare
+        save_path: Path to save the comparison plot
+        plot_formats: List of output formats ['png', 'pdf']
+        plot_dpi: DPI for saved plots
+        verbose: If True, print progress information
+    """
+    # Define color palette for different projects
+    colors = plt.cm.tab10(np.linspace(0, 1, len(project_names)))
+    
+    fig, ax = plt.subplots(figsize=(12, 7))
+    
+    for idx, project_name in enumerate(project_names):
+        # Load benchmark and evaluation results
+        results_dir = Path(workspace_path) / project_name / 'output' / 'results'
+        benchmark_path = results_dir / 'benchmark_results.json'
+        
+        if not benchmark_path.exists():
+            if verbose:
+                print(f"Warning: Benchmark results not found for project '{project_name}', skipping...")
+            continue
+        
+        with open(benchmark_path, 'r') as f:
+            results = json.load(f)
+        
+        # Extract exit point data
+        params_list = []
+        auc_list = []
+        exit_labels = []
+        
+        # Get number of exits from the results
+        num_exits = sum(1 for key in results.keys() if key.startswith('exit_'))
+        
+        for i in range(num_exits):
+            key = f'exit_{i}'
+            if key in results and results[key].get('params') is not None and results[key].get('auc') is not None:
+                params_list.append(results[key]['params'])
+                auc_list.append(results[key]['auc'])
+                exit_labels.append(f'E{i}')
+        
+        # Add full model
+        if 'full_model' in results:
+            params_full = results['full_model']['params']
+            auc_full = results['full_model']['auc']
+            
+            # Plot exit points as connected line
+            ax.plot(params_list, auc_list, 'o-', 
+                   color=colors[idx], markersize=8, linewidth=2, 
+                   alpha=0.7, label=f'{project_name} (exits)')
+            
+            # Plot full model as star
+            ax.plot([params_full], [auc_full], '*', 
+                   color=colors[idx], markersize=16, 
+                   markeredgecolor='black', markeredgewidth=0.5,
+                   label=f'{project_name} (full)')
+            
+            # Optionally annotate exit points for the first project only
+            if idx == 0:
+                for i, (params, auc, lbl) in enumerate(zip(params_list, auc_list, exit_labels)):
+                    ax.annotate(lbl, (params, auc), xytext=(5, 5), 
+                               textcoords='offset points', fontsize=8, alpha=0.6)
+    
+    # Formatting
+    ax.set_xlabel('Parameters', fontsize=14, fontweight='bold')
+    ax.set_ylabel('ROC-AUC', fontsize=14, fontweight='bold')
+    ax.set_title('Parameters vs ROC-AUC - Multi-Project Comparison', 
+                fontsize=16, fontweight='bold', pad=20)
+    
+    # Collect all unique x values for ticks
+    all_x = []
+    for line in ax.lines:
+        all_x.extend(line.get_xdata())
+    all_x = sorted(list(set(all_x)))
+    ax.set_xticks(all_x)
+    ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, _: f'{x / 1e6:.2f}M'))
+    ax.tick_params(axis='x', rotation=45)
+    
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc='best', framealpha=0.9, fontsize=10)
+    
     
     # Save plot
     Path(save_path).parent.mkdir(parents=True, exist_ok=True)
