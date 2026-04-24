@@ -630,6 +630,8 @@ def run_plots(paths: dict, config, verbose: bool = False) -> None:
     from phaze_ee.src.utils.plotting import (
         plot_flops_vs_accuracy,
         plot_params_vs_accuracy,
+        plot_flops_vs_auc,
+        plot_params_vs_auc,
     )
 
     if verbose:
@@ -640,6 +642,8 @@ def run_plots(paths: dict, config, verbose: bool = False) -> None:
     # Generate plots
     plot_flops_vs_accuracy(paths=paths, config=config, verbose=verbose)
     plot_params_vs_accuracy(paths=paths, config=config, verbose=verbose)
+    plot_flops_vs_auc(paths=paths, config=config, verbose=verbose)
+    plot_params_vs_auc(paths=paths, config=config, verbose=verbose)
 
     if verbose:
         print("\nPlots generated successfully!")
@@ -662,6 +666,8 @@ def run_comparison(
     from phaze_ee.src.utils.plotting import (
         plot_comparison_flops_vs_accuracy,
         plot_comparison_params_vs_accuracy,
+        plot_comparison_flops_vs_auc,
+        plot_comparison_params_vs_auc,
     )
 
     if verbose:
@@ -682,6 +688,8 @@ def run_comparison(
     # Generate comparison plots
     flops_save_path = os.path.join(output_path, "comparison_flops_vs_accuracy.png")
     params_save_path = os.path.join(output_path, "comparison_params_vs_accuracy.png")
+    flops_auc_save_path = os.path.join(output_path, "comparison_flops_vs_auc.png")
+    params_auc_save_path = os.path.join(output_path, "comparison_params_vs_auc.png")
 
     if verbose:
         print("Generating FLOPs vs Accuracy comparison plot...")
@@ -702,6 +710,30 @@ def run_comparison(
         workspace_path=workspace_path,
         project_names=project_names,
         save_path=params_save_path,
+        plot_formats=["png", "pdf"],
+        plot_dpi=300,
+        verbose=verbose,
+    )
+    
+    if verbose:
+        print("\nGenerating FLOPs vs ROC-AUC comparison plot...")
+
+    plot_comparison_flops_vs_auc(
+        workspace_path=workspace_path,
+        project_names=project_names,
+        save_path=flops_auc_save_path,
+        plot_formats=["png", "pdf"],
+        plot_dpi=300,
+        verbose=verbose,
+    )
+
+    if verbose:
+        print("\nGenerating Parameters vs ROC-AUC comparison plot...")
+
+    plot_comparison_params_vs_auc(
+        workspace_path=workspace_path,
+        project_names=project_names,
+        save_path=params_auc_save_path,
         plot_formats=["png", "pdf"],
         plot_dpi=300,
         verbose=verbose,
